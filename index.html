@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyaa Ai Chat</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            justify-content: space-between;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #chat-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            max-height: 450px;
+            box-sizing: border-box;
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 16px;
+            display: inline-block;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-out;
+            position: relative;
+        }
+
+        .user {
+            background-color: #d1ffd6;
+            align-self: flex-end;
+            border-radius: 20px 20px 0 20px;
+            color: #333;
+        }
+
+        .ai {
+            background-color: #e1f5fe;
+            align-self: flex-start;
+            border-radius: 20px 20px 20px 0;
+            color: #333;
+        }
+
+        input {
+            width: calc(100% - 50px);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 30px;
+            border: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            background: #f9f9f9;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #4CAF50;
+            background: #fff;
+        }
+
+        .send-btn {
+            padding: 15px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+            outline: none;
+        }
+
+        .send-btn:hover {
+            background-color: #45a049;
+        }
+
+        .loading {
+            color: #4CAF50;
+            font-style: italic;
+            font-size: 14px;
+            padding-left: 10px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        footer a {
+            text-decoration: none;
+            color: #4CAF50;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cyaa Ai Chat</h1>
+        <div id="chat-box"></div>
+        <div style="display: flex; justify-content: space-between;">
+            <input type="text" id="user-input" placeholder="Ketik pesan...">
+            <button class="send-btn" onclick="sendMessage()">↑</button>
+        </div>
+        <footer>
+            <p>&copy; 2025 Cyaa Ai. All rights reserved. <br>Powered by <a href="https://generativelanguage.googleapis.com" target="_blank">Gemini API</a></p>
+        </footer>
+    </div>
+
+<script>
+    let messageCount = 0;
+    const limit = 10; // Batas 10 pesan per sesi
+    const API_KEY = 'AIzaSyDpwXquMNFYtXsDo5eQ27qwjsERGE8qRDs'; // Ganti dengan API Key kamu
+    const URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + API_KEY;
+
+    function sendMessage() {
+        const userMessage = document.getElementById("user-input").value;
+        if (userMessage.trim() === "") return;
+
+        // custom response buat pertanyaan "nama kamu siapa"
+        if (userMessage.toLowerCase().includes("nama kamu siapa")) {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="message user">${userMessage}</div>`;
+            chatBox.innerHTML += `<div class="message ai">namakuu cyaa, Aku di kembangkan oleh Hazelnut dan memakai database dari <a href="_blank">Gemini API</a></div>`;
+            document.getElementById("user-input").value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return;
+        }
+
+        messageCount++;
+
+        if (messageCount > limit) {
+            alert("Batas pesan tercapai! Sesi baru dimulai.");
+            messageCount = 0;
+            document.getElementById("chat-box").innerHTML = "";
+        }
+
+        const chatBox = document.getElementById("chat-box");
+        chatBox.innerHTML += `<div class="message user">${userMessage}</div>`;
+
+        // Show loading message while waiting for the response
+        chatBox.innerHTML += `<div class="message loading">Loading</div>`;
+
+        const data = {
+            "contents": [
+                {
+                    "parts": [{"text": userMessage}]
+                }
+            ]
+        };
+
+        fetch(URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const aiResponse = data.candidates[0].content.parts[0].text;
+            const loadingMessage = document.querySelector('.loading');
+            if (loadingMessage) loadingMessage.remove();
+
+            const isCode = aiResponse.includes("<code>") || aiResponse.includes("</code>");
+
+            let aiMessageHTML = `<div class="message ai">${aiResponse}</div>`;
+            
+            if (isCode) {
+                aiMessageHTML = `
+                    <div class="message ai">
+                        <pre>${aiResponse}</pre>
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                    </div>
+                `;
+            }
+            chatBox.innerHTML += aiMessageHTML;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const loadingMessage = document.querySelector('.loading');
+            if (loadingMessage) loadingMessage.remove();
+            chatBox.innerHTML += `<div class="message ai">Sky Ai error...</div>`;
+        });
+
+        document.getElementById("user-input").value = "";
+    }
+
+    function copyCode(button) {
+        const code = button.previousElementSibling.textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert("Code copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
+</body>
+</html>
